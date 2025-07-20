@@ -2,8 +2,6 @@ import React from 'react';
 import { Dimensions, Pressable, Text, View } from 'react-native';
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
-import image1 from '@/assets/images/c1.jpg';
-import image2 from '@/assets/images/c2.jpg';
 import image3 from '@/assets/images/c3.jpg';
 import image4 from '@/assets/images/c4.jpg';
 
@@ -16,11 +14,12 @@ const gaping = 5; // Spacing between images
 
 
 const data = [
-    { id: 1, image: image1, name: "The Hosteller Agra" },
-    { id: 2, image: image2, name: "The Hosteller Amritsar" },
+    { id: 1, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/a6b56252-1d3e-4045-bad2-9e66371e147e-agra_1.jpeg" }, name: "The Hosteller Agra" },
+    { id: 2, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/5ffcd2db-bcf6-4f30-bff7-858eed492fba-amritsar_1.jpg" }, name: "The Hosteller Amritsar" },
     { id: 3, image: image3, name: "The Hosteller Bangalore" },
     { id: 4, image: image4, name: "The Hosteller Bhandardara" },
 ];
+
 
 
 

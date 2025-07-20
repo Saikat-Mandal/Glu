@@ -20,7 +20,6 @@ const Home = () => {
     }
 
     const rotateAnim = useRef(new Animated.Value(0)).current;
-    const [search, setSearch] = useState('');
     const [curlocation, setCurlocation] = useState('');
     const [tab, setTab] = useState('Love'); // Set "Love" as the default tab
     const [hostel, setHostel] = useState(null); // Set "Love" as the default tab
@@ -81,7 +80,7 @@ const Home = () => {
 
             getHostels()
         } catch (error) {
-
+            console.log(error);
         }
 
     }, [tab])

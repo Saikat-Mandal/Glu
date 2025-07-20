@@ -1,13 +1,39 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+
+import { formatToUTCBookingReview } from '@/utils/hostelUtils';
 
 import UserInfo from '@/components/UserInfo';
 import image from '../assets/images/c1.jpg';
 
 const BookingReview = () => {
 
+    const { hostelImage, checkInDate, checkOutDate, selectedRooms, totalPrice, tax, grandTotal, totalNights } = useLocalSearchParams();
+
+    let rooms: any[] = [];
+
+    try {
+        const selectedRoomsStr = Array.isArray(selectedRooms)
+            ? selectedRooms[0] // Take the first element if it's an array
+            : selectedRooms;   // Use directly if it's a string
+
+        rooms = selectedRoomsStr ? JSON.parse(selectedRoomsStr) : [];
+    } catch (e) {
+        console.error("Invalid selectedRooms", e);
+    }
+
+    const getTotalNights = (param: string | string[] | undefined): number => {
+        if (!param) return 1; // Default to 1 night if undefined
+
+        const value = Array.isArray(param) ? param[0] : param;
+
+        const parsed = parseInt(value, 10);
+        return isNaN(parsed) ? 1 : parsed;
+    };
+
+    const nights = getTotalNights(totalNights);
 
 
     return (
@@ -17,38 +43,54 @@ const BookingReview = () => {
             </Pressable>
             <ScrollView>
 
-
+                {/* dates  */}
                 <Text className='text-3xl font-fbold px-8'>Review your details</Text>
 
                 <View className='flex-row items-center justify-between mt-8 border-b border-gray-200 pb-8 pt-4 mx-8'>
                     <View>
                         <Text >Check-In</Text>
-                        <Text className=' text-xl font-fbold'>Tue, 01 Apr'25</Text>
+                        <Text className=' text-xl font-fbold'>{formatToUTCBookingReview(checkInDate)}</Text>
                     </View>
                     <Ionicons name="arrow-forward-outline" size={24} color="black" />
                     <View>
                         <Text>Check-Out</Text>
-                        <Text className=' text-xl font-fbold'>Tue, 05 Apr'25</Text>
+                        <Text className=' text-xl font-fbold'>{formatToUTCBookingReview(checkOutDate)}</Text>
                     </View>
                 </View>
 
+
+                {/* rooms info  */}
                 <Text className='text-2xl font-fbold py-6 px-8'>Room info</Text>
-                <View className='flex-row justify-between items-center border-b border-gray-200 pb-8 pt-4 mx-8'>
-                    <View className='flex-row items-center gap-x-4 '>
-                        <Image
-                            source={image}
-                            // resizeMode='contain'
-                            className='h-20 w-20 rounded-2xl'
-                        />
-                        <View>
-                            <Text className=' font-fbold '>4 bed mixed dorm AC</Text>
-                            <Text className=' font-fbold '>₹ 699 x 2</Text>
-                            <Text className=' font-fregular text-sm'>for 1 night</Text>
-                        </View>
-                    </View>
-                    <Text className=' font-fregular '>₹ 699</Text>
-                </View>
 
+                {
+                    rooms?.map((item, index) => (
+                        <View
+                            key={index} // ✅ Add key here
+                            className='flex-row justify-between items-center border-b border-gray-200 pb-8 pt-4 mx-8'
+                        >
+                            <View className='flex-row items-center gap-x-4 '>
+                                <Image
+                                    source={hostelImage ? { uri: Array.isArray(hostelImage) ? hostelImage[0] : hostelImage } : image}
+                                    className='h-20 w-20 rounded-2xl'
+                                />
+
+                                <View>
+                                    <Text className=' font-fbold '>{item.roomType}</Text>
+                                    <Text className=' font-fbold '>₹ {item.price} x {item.beds}</Text>
+
+                                    <Text className=' font-fregular text-sm'>
+                                        for {nights} {nights > 1 ? 'nights' : 'night'}
+                                    </Text>
+
+
+                                </View>
+                            </View>
+                            <Text className=' font-fregular '>₹ {item.price * item.beds}</Text>
+                        </View>
+                    ))
+                }
+
+                {/* guest info  */}
                 <Text className='text-2xl font-fbold py-6 px-8'>Guest info</Text>
 
                 <View className='border-b border-gray-200 pb-8 pt-4 mx-8'>
@@ -64,11 +106,14 @@ const BookingReview = () => {
                     />
                 </View>
 
+
+                {/* payment info  */}
                 <Text className='text-2xl font-fbold py-6 mx-8'>Payment info</Text>
+
                 <View className='px-8'>
                     <View className='flex-row items-center justify-between mb-4'>
                         <Text className='text-xl font-fregular'>Stay total</Text>
-                        <Text className='text-xl font-fregular'>₹ 699</Text>
+                        <Text className='text-xl font-fregular'>₹ {totalPrice}</Text>
                     </View>
                     <View className='flex-row items-center justify-between mb-4'>
                         <Text className='text-xl font-fregular'>Offer</Text>
@@ -76,14 +121,13 @@ const BookingReview = () => {
                     </View>
                     <View className='flex-row items-center justify-between mb-4'>
                         <Text className='text-xl font-fregular'>Total taxes</Text>
-                        <Text className='text-xl font-fregular'>₹ 185</Text>
+                        <Text className='text-xl font-fregular'>₹ {tax}</Text>
                     </View>
-
                 </View>
 
                 <View className='flex-row items-center justify-between mb-4 p-4 rounded-xl mx-4 bg-[#FFFAFA] '>
                     <Text className='text-xl font-fbold'>Grand total</Text>
-                    <Text className='text-xl font-fsemibold'>₹ 983</Text>
+                    <Text className='text-xl font-fsemibold'>₹ {grandTotal}</Text>
                 </View>
 
 

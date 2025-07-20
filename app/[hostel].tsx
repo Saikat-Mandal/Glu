@@ -13,7 +13,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import image from '../assets/images/c1.jpg';
 
 // types 
-
 interface RoomType {
     id: number;
     roomType: string;
@@ -165,7 +164,30 @@ const Hostel: React.FC = () => {
     // change route to booking review 
     const changeToReview = () => {
         setSummaryModalVisible(false)
-        router.push("/bookingreview")
+        const nights = getTotalNights();
+        const selectedRoomDetails = hostel?.rooms
+            .filter(room => selectedRooms[room.id] > 0)
+            .map(room => ({
+                id: room.id,
+                roomType: room.roomType,
+                beds: selectedRooms[room.id],
+                price: room.price,
+                nights: nights
+            }));
+
+        router.push({
+            pathname: "/bookingreview",
+            params: {
+                hostelImage: hostel?.images[0] || '',
+                checkInDate: dateRange.start,
+                checkOutDate: dateRange.end,
+                totalNights: nights.toString(),
+                selectedRooms: JSON.stringify(selectedRoomDetails),
+                totalPrice: totalPrice.toString(),
+                tax: calcTax(totalPrice).toString(),
+                grandTotal: (totalPrice + calcTax(totalPrice)).toString(),
+            }
+        })
     }
 
 

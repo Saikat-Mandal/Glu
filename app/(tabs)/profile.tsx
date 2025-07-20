@@ -1,10 +1,14 @@
+import SettingsTab from '@/components/SettingsTab';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, ImageBackground, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import girl from '../../assets/images/girl.jpg';
 import leather from '../../assets/images/leather.jpg';
 
@@ -12,6 +16,78 @@ const Profile = () => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [userDetails, setUserDetails] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const [openSettings, setOpenSettings] = useState(false)
+    const [openOptions, setOpenOptions] = useState(false)
+
+
+    const settingsArray = [
+        { id: '1', name: 'Notifications', icon: <FontAwesome5 name="bell" size={24} color="black" /> },
+        { id: '2', name: 'Currency', icon: <FontAwesome5 name="dollar-sign" size={24} color="black" /> },
+        // { id: '3', name: 'Logout', icon: <FontAwesome5 name="sign-out-alt" size={24} color="black" /> },
+    ];
+
+
+    const optionsArray = [
+        {
+            id: '1',
+            name: 'About The Hosteller',
+            icon: <MaterialIcons name="hotel-class" size={24} color="black" />,
+            pagelink: "https://www.thehosteller.com/about/",
+        },
+        {
+            id: '2',
+            name: 'Career',
+            icon: <FontAwesome5 name="briefcase" size={24} color="black" />,
+            pagelink: "https://www.linkedin.com/company/the-hosteller-hospitality/jobs/?originalSubdomain=in",
+        },
+        {
+            id: '3',
+            name: 'Contact Us',
+            icon: <FontAwesome5 name="phone" size={24} color="black" />,
+            pagelink: "https://www.thehosteller.com/contactus/",
+        },
+        {
+            id: '4',
+            name: 'Terms and Conditions',
+            icon: <FontAwesome5 name="file-contract" size={24} color="black" />,
+            pagelink: "https://www.thehosteller.com/policies/",
+        },
+        {
+            id: '5',
+            name: 'Privacy Policy',
+            icon: <FontAwesome5 name="user-shield" size={24} color="black" />,
+            pagelink: "https://www.thehosteller.com/policies/",
+        },
+        {
+            id: '6',
+            name: 'Guest Policy',
+            icon: <FontAwesome5 name="users" size={24} color="black" />,
+            pagelink: "https://www.thehosteller.com/policies/",
+        },
+        {
+            id: '7',
+            name: 'Delete Account',
+            icon: <FontAwesome5 name="trash-alt" size={24} color="#FF2400" />,
+            textStyles: "text-[#FF2400]",
+            pagelink: "/delete",
+        }
+    ];
+
+    const handleSocialLink = async (url: string) => {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+        await Linking.openURL(url);
+    };
+
+    const SocialButton = ({ url, icon }: { url: string, icon: React.ReactNode }) => (
+        <TouchableOpacity
+            onPress={() => handleSocialLink(url)}
+            style={styles.socialButton}
+        >
+            {icon}
+        </TouchableOpacity>
+    );
+
     // const { token } = useContext(AuthContext);
 
     // useEffect(() => {
@@ -48,17 +124,150 @@ const Profile = () => {
                 <View className='flex-row items-center justify-between'>
                     <Pressable onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
-                        router.push('/settings');
-                    }}>
+                        setOpenSettings(true)
+                    }} >
                         <Ionicons name='settings' size={32} color='black' />
                     </Pressable>
                     <Pressable onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
-                        router.push('/option');
-                    }}>
+                        setOpenOptions(true)
+                    }} >
                         <Entypo name='menu' size={32} color='black' />
                     </Pressable>
                 </View>
+
+                {/* modal for settings */}
+
+                <Modal
+                    visible={openSettings}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setOpenSettings(false)}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: "flex-end",
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        width: '100%'
+                    }}>
+
+                        <View style={{
+                            backgroundColor: "white",
+                            borderRadius: 10,
+                            padding: 20,
+                            width: '100%',
+                            height: '50%'
+                        }}>
+
+                            <View className='px-4'>
+                                {/* <View className='w-16 h-[4px] bg-gray-400 rounded-full self-center mb-10' /> */}
+                                <Pressable className='w-full mb-10' onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+                                    setOpenSettings(false)
+                                }}>
+                                    <AntDesign className='self-end' name="closecircle" size={24} color="black" />
+                                </Pressable>
+
+                                {settingsArray.map(item => {
+                                    return (
+                                        <SettingsTab
+                                            id={item.id}
+                                            key={item.id}
+                                            name={item.name}
+                                            icon={item.icon}
+                                            pagelink={item.pagelink}
+                                        />
+                                    )
+                                })}
+                                <Pressable onPress={() => console.log()} className='gap-x-3 flex-row pb-4'>
+                                    <Text> <FontAwesome5 name="sign-out-alt" size={24} color="black" /></Text>
+                                    <Text className="font-fbold text-xl">Logout</Text>
+                                </Pressable>
+                                <View className='w-80 h-[1px] bg-gray-50 rounded-full self-center mb-7' />
+
+
+                            </View>
+
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* modal for options  */}
+
+                <Modal
+                    visible={openOptions}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setOpenOptions(false)}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: "flex-end",
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        width: '100%'
+                    }}>
+
+                        <View style={{
+                            backgroundColor: "white",
+                            borderRadius: 10,
+                            padding: 20,
+                            width: '100%',
+                            height: '80%'
+                        }}>
+
+                            <View className='px-4'>
+                                {/* <View className='w-16 h-[4px] bg-gray-400 rounded-full self-center mb-10' /> */}
+                                <Pressable className='w-full mb-10' onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+                                    setOpenOptions(false)
+                                }}>
+                                    <AntDesign className='self-end' name="closecircle" size={24} color="black" />
+                                </Pressable>
+
+                                <View className='px-4'>
+
+
+                                    {/* Settings Options */}
+                                    {optionsArray.map(item => (
+                                        <SettingsTab
+                                            key={item.id}
+                                            id={item.id}
+                                            name={item.name}
+                                            icon={item.icon}
+                                            textStyles={item.textStyles}
+                                            pagelink={item.pagelink}
+                                        />
+                                    ))}
+
+                                    {/* Social Media Section */}
+                                    <View style={styles.socialSection}>
+                                        <Text className='font-fbold text-xl text-center text-stone-500'>
+                                            Check us out on
+                                        </Text>
+                                        <View className='flex-row justify-center mt-5 gap-x-10'>
+                                            <SocialButton
+                                                url="https://www.instagram.com/thehosteller/"
+                                                icon={<Entypo name="instagram" size={24} color="#BE00A7" />}
+                                            />
+                                            <SocialButton
+                                                url="https://x.com/thehosteller"
+                                                icon={<FontAwesome6 name="x-twitter" size={24} color="black" />}
+                                            />
+                                            <SocialButton
+                                                url="https://www.youtube.com/@The_Hosteller"
+                                                icon={<Entypo name="youtube" size={24} color="red" />}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                            </View>
+
+                        </View>
+                    </View>
+                </Modal>
+
+
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <View className='items-center mt-10 rounded-3xl'>
                         <View className='h-80 w-4/6 rounded-e-[1.8em] bg-primary rounded-s-md items-center relative overflow-hidden'>
@@ -101,5 +310,16 @@ const Profile = () => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+
+    socialSection: {
+        paddingBottom: 20,
+    },
+    socialButton: {
+        padding: 8,
+    },
+});
+
 
 export default Profile;
