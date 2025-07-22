@@ -1,19 +1,22 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
-import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { formatToUTCBookingReview } from '@/utils/hostelUtils';
 
 import UserInfo from '@/components/UserInfo';
+import { useStripe } from '@stripe/stripe-react-native';
 import image from '../assets/images/c1.jpg';
 
 const BookingReview = () => {
 
     const { hostelImage, checkInDate, checkOutDate, selectedRooms, totalPrice, tax, grandTotal, totalNights } = useLocalSearchParams();
 
-    let rooms: any[] = [];
+    const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    const [loading, setLoading] = useState(false);
 
+    let rooms: any[] = [];
     try {
         const selectedRoomsStr = Array.isArray(selectedRooms)
             ? selectedRooms[0] // Take the first element if it's an array
@@ -35,6 +38,81 @@ const BookingReview = () => {
 
     const nights = getTotalNights(totalNights);
 
+
+    // stripe payments
+
+    // Convert totalPrice to cents for Stripe (assuming it's in rupees)
+    const getAmountInCents = (price) => {
+        const priceValue = Array.isArray(price) ? price[0] : price;
+        return Math.round(parseFloat(priceValue) * 100); // Convert to paise (cents equivalent for INR)
+    };
+
+    const fetchPaymentSheetParams = async () => {
+        const response = await fetch(`http://192.168.29.221:8080/api/v1/payment-sheet`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: getAmountInCents(grandTotal)
+            })
+        });
+
+        const { paymentIntent, ephemeralKey, customer } = await response.json();
+
+        return {
+            paymentIntent,
+            ephemeralKey,
+            customer,
+        };
+    };
+
+    const initializePaymentSheet = async () => {
+        try {
+            const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams();
+
+            const { error } = await initPaymentSheet({
+                customerId: customer,
+                customerEphemeralKeySecret: ephemeralKey,
+                paymentIntentClientSecret: paymentIntent,
+                merchantDisplayName: "The Hosteller",
+                allowsDelayedPaymentMethods: true,
+                defaultBillingDetails: {
+                    name: 'Saikat Mandal',
+                },
+                // returnURL: 'hosteller://payment-return'
+            });
+
+            if (error) {
+                console.error("❌ initPaymentSheet failed:", error);
+                Alert.alert("Payment error", error.message);
+            } else {
+                console.log("✅ Payment sheet initialized");
+                setLoading(true);
+            }
+        } catch (e) {
+            console.error("💥 Error in initializePaymentSheet:", e);
+            Alert.alert("Payment setup failed", e.message);
+        }
+    };
+
+
+    const openPaymentSheet = async () => {
+        const { error } = await presentPaymentSheet();
+
+        if (error) {
+            console.error("❌ Payment failed via Stripe:", error);
+            Alert.alert(`Error code: ${error.code}`, error.message);
+        } else {
+            Alert.alert('✅ Success', 'Your order is confirmed!');
+            router.replace("/(tabs)/home");
+        }
+    };
+
+
+    useEffect(() => {
+        initializePaymentSheet();
+    }, []);
 
     return (
         <View className='mt-20 flex-1 '>
@@ -65,7 +143,7 @@ const BookingReview = () => {
                 {
                     rooms?.map((item, index) => (
                         <View
-                            key={index} // ✅ Add key here
+                            key={index}
                             className='flex-row justify-between items-center border-b border-gray-200 pb-8 pt-4 mx-8'
                         >
                             <View className='flex-row items-center gap-x-4 '>
@@ -136,7 +214,13 @@ const BookingReview = () => {
                     and cancellation policy
                 </Text>
 
-                <TouchableOpacity className='bg-primary mx-8 p-4 flex justify-center items-center mt-10 mb-10 rounded-lg'>
+                <TouchableOpacity
+                    onPress={async () => {
+                        await initializePaymentSheet().then(async () => {
+                            await openPaymentSheet()
+                        });
+                    }}
+                    className='bg-primary mx-8 p-4 flex justify-center items-center mt-10 mb-10 rounded-lg'>
                     <Text className='text-xl font-fbold'>Proceed to pay</Text>
                 </TouchableOpacity>
 

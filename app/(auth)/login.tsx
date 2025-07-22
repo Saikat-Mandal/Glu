@@ -48,7 +48,7 @@ const Login = () => {
     const fetchData = async () => {
         setIsLoading(true)
         try {
-            const response = await axios.post(`http://192.168.29.221:8080/api/v1/auth/public/signin`, {
+            const response = await axios.post(`http://192.168.29.221:8080/api/v1/auth/signin`, {
                 username,
                 password
             });
