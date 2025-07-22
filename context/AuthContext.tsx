@@ -1,77 +1,65 @@
-import React, { createContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { jwtDecode } from 'jwt-decode';
+import * as SecureStore from "expo-secure-store";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-export const AuthContext = createContext(null);
+interface AuthContextProps {
+    user: any;
+    token: string | null;
+    login: (token: string, user: any) => void;
+    logout: () => void;
+    isAuthenticated: boolean;
+}
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState<string | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true);
+const AuthContext = createContext<AuthContextProps>({
+    user: null,
+    token: null,
+    login: () => { },
+    logout: () => { },
+    isAuthenticated: false,
+});
 
-    // Check for existing token on startup
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<any>(null);
+
     useEffect(() => {
         const loadToken = async () => {
-            try {
-                const storedToken = await AsyncStorage.getItem('userToken');
-                if (storedToken) {
-                    setToken(storedToken);
-                    const decodedUser = jwtDecode(storedToken);
-                    setUser(decodedUser?.sub);
-                    setIsLoggedIn(true);
-                }
-            } catch (error) {
-                console.error('Failed to load auth token', error);
-            } finally {
-                setLoading(false);
+            const storedToken = await SecureStore.getItemAsync("jwtToken");
+            const storedUser = await SecureStore.getItemAsync("user");
+
+            if (storedToken) {
+                setToken(storedToken);
+                // setUser(JSON.parse(storedUser!));
+                setUser(storedUser);
             }
         };
 
         loadToken();
     }, []);
 
-    const login = async (userToken) => {
-        try {
-            await AsyncStorage.setItem('userToken', userToken);
-            const decodedUser = jwtDecode(userToken);
 
-            // console.log(decodedUser);
-
-            setToken(userToken);
-            setUser(decodedUser?.sub);
-            setIsLoggedIn(true)
-
-        } catch (error) {
-            console.error('Failed to save auth token', error);
-            throw error;
-        }
+    // login 
+    const login = async (jwt: string, userData: any) => {
+        await SecureStore.setItemAsync("jwtToken", jwt);
+        // await SecureStore.setItemAsync("user", JSON.stringify(userData));
+        await SecureStore.setItemAsync("user", userData.username);
+        setToken(jwt);
+        setUser(userData.username);
     };
 
+    // logout 
     const logout = async () => {
-        try {
-            await AsyncStorage.removeItem('userToken');
-            setToken(null);
-            setUser(null);
-            setIsLoggedIn(false)
-        } catch (error) {
-            console.error('Failed to remove auth token', error);
-        }
+        await SecureStore.deleteItemAsync("jwtToken");
+        await SecureStore.deleteItemAsync("user");
+        setToken(null);
+        setUser(null);
     };
 
     return (
-        <AuthContext.Provider
-            value={{
-                user,
-                token,
-                login,
-                logout,
-                loading,
-                isLoggedIn,
-                setIsLoggedIn
-            }}
-        >
+        <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated: !!token }}>
             {children}
         </AuthContext.Provider>
     );
 };
+
+export const useAuth = () => useContext(AuthContext);

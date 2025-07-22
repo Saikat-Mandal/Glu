@@ -1,14 +1,17 @@
 import SettingsTab from '@/components/SettingsTab';
+import { useAuth } from "@/context/AuthContext";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import axios from 'axios';
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { ActivityIndicator, Image, ImageBackground, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, ImageBackground, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import girl from '../../assets/images/girl.jpg';
 import leather from '../../assets/images/leather.jpg';
 
@@ -20,6 +23,8 @@ const Profile = () => {
     const [openSettings, setOpenSettings] = useState(false)
     const [openOptions, setOpenOptions] = useState(false)
 
+    const { logout } = useAuth()
+
 
     const settingsArray = [
         { id: '1', name: 'Notifications', icon: <FontAwesome5 name="bell" size={24} color="black" /> },
@@ -27,6 +32,11 @@ const Profile = () => {
         // { id: '3', name: 'Logout', icon: <FontAwesome5 name="sign-out-alt" size={24} color="black" /> },
     ];
 
+    const onLogout = () => {
+        logout()
+        Alert.alert("Successfully logged out!")
+        router.replace("/(tabs)/home")
+    }
 
     const optionsArray = [
         {
@@ -88,39 +98,39 @@ const Profile = () => {
         </TouchableOpacity>
     );
 
-    // const { token } = useContext(AuthContext);
+    const { token } = useAuth();
 
-    // useEffect(() => {
-    //     const getUserDetails = async () => {
-    //         try {
-    //             const res = await axios.get('http://192.168.29.221:8080/api/v1/auth/public/user', {
-    //                 headers: {
-    //                     'Authorization': `Bearer ${token}`,
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //             });
-    //             setUserDetails(res.data);
-    //         } catch (error) {
-    //             console.error('Error fetching user details:', error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
+    useEffect(() => {
+        const getUserDetails = async () => {
+            try {
+                const res = await axios.get('http://192.168.29.221:8080/api/v1/auth/public/user', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                setUserDetails(res.data);
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    //     getUserDetails();
-    // }, []);
+        getUserDetails();
+    }, []);
 
-    // if (loading) {
-    //     return (
-    //         <View className='flex-1 justify-center items-center'>
-    //             <ActivityIndicator size='large' color='#51344D' />
-    //         </View>
-    //     );
-    // }
+    if (loading) {
+        return (
+            <View className='flex-1 justify-center items-center'>
+                <ActivityIndicator size='large' color='#51344D' />
+            </View>
+        );
+    }
 
     return (
         <View className='flex-1'>
-            <View className='mt-20 px-8'>
+            <View className='mt-10 px-8'>
                 <View className='flex-row items-center justify-between'>
                     <Pressable onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
@@ -179,7 +189,7 @@ const Profile = () => {
                                         />
                                     )
                                 })}
-                                <Pressable onPress={() => console.log()} className='gap-x-3 flex-row pb-4'>
+                                <Pressable onPress={onLogout} className='gap-x-3 flex-row pb-4'>
                                     <Text> <FontAwesome5 name="sign-out-alt" size={24} color="black" /></Text>
                                     <Text className="font-fbold text-xl">Logout</Text>
                                 </Pressable>
@@ -269,8 +279,12 @@ const Profile = () => {
 
 
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View className='items-center mt-10 rounded-3xl'>
-                        <View className='h-80 w-4/6 rounded-e-[1.8em] bg-primary rounded-s-md items-center relative overflow-hidden'>
+                    <View className='items-center mt-20 rounded-3xl'>
+                        <View
+                            style={{
+                                borderRadius: 30
+                            }}
+                            className='h-80 w-4/6 bg-primary items-center relative overflow-hidden'>
                             <ImageBackground source={leather} resizeMode='cover' className='absolute inset-0 w-full h-full opacity-50' />
                             <Text className='mt-8 font-fbold text-[#fff185] text-xl '>GLU VISA</Text>
                             <View className='border-[#51344D] h-32 w-32 border-4 rounded-full p-1 z-10 mt-8'>

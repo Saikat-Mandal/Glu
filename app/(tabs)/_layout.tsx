@@ -1,14 +1,17 @@
 
+import { useAuth } from "@/context/AuthContext";
 import Feather from '@expo/vector-icons/Feather';
 import Octicons from '@expo/vector-icons/Octicons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 const TabsLayout = () => {
 
     const handleTabPress = async () => {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
     };
+
+    const { isAuthenticated } = useAuth()
 
     return (
 
@@ -81,7 +84,15 @@ const TabsLayout = () => {
 
             <Tabs.Screen
                 listeners={{
-                    tabPress: handleTabPress
+                    tabPress: (e) => {
+                        e.preventDefault(); // Stop default tab behavior
+
+                        if (isAuthenticated) {
+                            router.push('/profile');
+                        } else {
+                            router.push('/(auth)/login');
+                        }
+                    },
                 }}
                 name="profile"
                 options={{

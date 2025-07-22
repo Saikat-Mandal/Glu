@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/context/AuthContext';
 import { useFonts } from 'expo-font';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
@@ -37,23 +38,26 @@ export default function RootLayout() {
 
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="option" options={{
-        headerShown: false,
-        presentation: 'modal',
-        contentStyle: { backgroundColor: 'transparent' },
-      }} />
-      <Stack.Screen name="settings" options={{
-        headerShown: false,
-        presentation: 'modal',
-        contentStyle: { backgroundColor: 'transparent' },
-      }} />
-      <Stack.Screen name="map" options={{ headerShown: false }} />
-      <Stack.Screen name="search" options={{ headerShown: false }} />
-      <Stack.Screen name="bookingreview" options={{ headerShown: false }} />
-      <Stack.Screen name="[hostel]" options={{ headerShown: false }} />
-    </Stack>
+    <AuthProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="option" options={{
+          headerShown: false,
+          presentation: 'modal',
+          contentStyle: { backgroundColor: 'transparent' },
+        }} />
+        <Stack.Screen name="settings" options={{
+          headerShown: false,
+          presentation: 'modal',
+          contentStyle: { backgroundColor: 'transparent' },
+        }} />
+        <Stack.Screen name="map" options={{ headerShown: false }} />
+        <Stack.Screen name="search" options={{ headerShown: false }} />
+        <Stack.Screen name="bookingreview" options={{ headerShown: false }} />
+        <Stack.Screen name="[hostel]" options={{ headerShown: false }} />
+      </Stack>
+    </AuthProvider>
   );
 }

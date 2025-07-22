@@ -2,8 +2,6 @@ import React from 'react';
 import { Dimensions, Pressable, Text, View } from 'react-native';
 import Animated, { interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
-import image3 from '@/assets/images/c3.jpg';
-import image4 from '@/assets/images/c4.jpg';
 
 import { router } from 'expo-router';
 
@@ -16,8 +14,8 @@ const gaping = 5; // Spacing between images
 const data = [
     { id: 1, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/a6b56252-1d3e-4045-bad2-9e66371e147e-agra_1.jpeg" }, name: "The Hosteller Agra" },
     { id: 2, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/5ffcd2db-bcf6-4f30-bff7-858eed492fba-amritsar_1.jpg" }, name: "The Hosteller Amritsar" },
-    { id: 3, image: image3, name: "The Hosteller Bangalore" },
-    { id: 4, image: image4, name: "The Hosteller Bhandardara" },
+    { id: 3, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/22e8f444-b433-4ad0-85a3-af3e7b827b05-bangalore_1.jpg" }, name: "The Hosteller Bangalore" },
+    { id: 4, image: { uri: "https://cyrox-hostel-bucket.s3.ap-south-1.amazonaws.com/6d42c1e6-f7fe-4e5d-9e0c-36e064dc1076-bhandardara_1.jpg" }, name: "The Hosteller Bhandardara" },
 ];
 
 

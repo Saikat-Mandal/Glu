@@ -8,21 +8,47 @@ import image from "@/assets/images/c1.jpg";
 import Button from '@/components/Button';
 import Caraousal from '@/components/Caraousal';
 import Offers from '@/components/Offers';
+import { useAuth } from '@/context/AuthContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 
-const Home = () => {
-    const auth = {
-        user: "saikat"
-    }
+// types 
+// types 
+interface RoomType {
+    id: number;
+    roomType: string;
+    price: number;
+    availability: boolean;
+    numberOfBeds: number;
+}
 
+interface HostelType {
+    id: number;
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    pincode: string;
+    description: string;
+    initialPrice: number;
+    latitude: number;
+    longitude: number;
+    rooms: RoomType[];
+    amenities: string[];
+    images: string[];
+}
+
+
+const Home = () => {
+    const { user } = useAuth()
     const rotateAnim = useRef(new Animated.Value(0)).current;
     const [curlocation, setCurlocation] = useState('');
     const [tab, setTab] = useState('Love'); // Set "Love" as the default tab
-    const [hostel, setHostel] = useState(null); // Set "Love" as the default tab
+    const [hostel, setHostel] = useState<HostelType | null>(null); // Set "Love" as the default tab
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     // globe animation 
@@ -90,7 +116,7 @@ const Home = () => {
     return (
         <ScrollView className="flex-1 px-6">
             <View className="flex-row items-center mt-20 justify-between">
-                <Text className="font-fbold text-3xl">Ohai👋 {auth?.user}</Text>
+                <Text className="font-fbold text-3xl">Ohai👋{user ? user : "pookie"}</Text>
                 <View className="flex-row items-center bg-black rounded-full px-3 py-2 gap-x-1">
                     <Text className="text-white">700</Text>
                     <Text>🪙</Text>
@@ -140,7 +166,7 @@ const Home = () => {
                             {/* First 3x3 Grid */}
                             <View style={{ width: 300, height: 350, marginRight: 10 }}>
                                 <FlatList
-                                    data={hostel.slice(0, 9)} // Take only first 9 items for first grid
+                                    data={hostel?.slice(0, 9)} // Take only first 9 items for first grid
                                     numColumns={3}
                                     scrollEnabled={false}
                                     keyExtractor={(item, index) => `grid1-${index}`}
@@ -164,7 +190,7 @@ const Home = () => {
                             {hostel?.length > 9 && (
                                 <View style={{ width: 300, height: 300 }}>
                                     <FlatList
-                                        data={hostel.slice(9)} // Take remaining items
+                                        data={hostel?.slice(9)} // Take remaining items
                                         numColumns={3}
                                         scrollEnabled={false}
                                         keyExtractor={(item, index) => `grid2-${index}`}

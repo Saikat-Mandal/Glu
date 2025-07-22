@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
+import { getItem } from './AsyncStorageUtils';
 
 // Type for decoded JWT token
 type DecodedToken = {
@@ -27,7 +27,7 @@ export const isTokenExpired = (token: string): boolean => {
  */
 export const getToken = async (): Promise<string | null> => {
     try {
-        const token = await AsyncStorage.getItem('jwt_token');
+        const token = await getItem('jwt_token');
         if (token && !isTokenExpired(token)) {
             return token;
         }
