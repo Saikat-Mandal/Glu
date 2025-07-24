@@ -103,7 +103,7 @@ const Profile = () => {
     useEffect(() => {
         const getUserDetails = async () => {
             try {
-                const res = await axios.get('http://192.168.29.221:8080/api/v1/auth/public/user', {
+                const res = await axios.get('http://192.168.29.221:8080/api/v1/auth/user', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',

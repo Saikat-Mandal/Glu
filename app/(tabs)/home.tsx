@@ -51,6 +51,7 @@ const Home = () => {
     const [hostel, setHostel] = useState<HostelType | null>(null); // Set "Love" as the default tab
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+
     // globe animation 
     useEffect(() => {
         Animated.loop(

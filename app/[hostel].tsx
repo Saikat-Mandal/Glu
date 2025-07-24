@@ -19,6 +19,7 @@ interface RoomType {
     price: number;
     availability: boolean;
     numberOfBeds: number;
+    imageUrl: string
 }
 
 interface HostelType {
@@ -460,6 +461,7 @@ const Hostel: React.FC = () => {
                                     roomType={item.roomType}
                                     price={item.price}
                                     availability={item.availability}
+                                    imageUrl={item.imageUrl}
                                     onBedsChange={(beds: number) => handleRoomSelection(item.id, beds, item.price)}
                                 />
                             ))

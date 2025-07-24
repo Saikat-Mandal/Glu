@@ -9,8 +9,7 @@ import { router } from 'expo-router'
 const Login = () => {
     const { login } = useAuth()
 
-    // const [email, setEmail] = useState<string>('');
-    const [username, setusername] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [showEmailPasswordsFields, setShowEmailPasswordsFields] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,7 +48,7 @@ const Login = () => {
         setIsLoading(true)
         try {
             const response = await axios.post(`http://192.168.29.221:8080/api/v1/auth/signin`, {
-                username,
+                email,
                 password
             });
             if (response?.data) {
@@ -57,7 +56,7 @@ const Login = () => {
 
 
                 login(response?.data.jwtToken, userData)
-                setusername('')
+                setEmail('')
                 setPassword('')
                 router.replace("/(tabs)/home")
             }
@@ -109,7 +108,7 @@ const Login = () => {
                 className='flex-row items-center justify-between border-2 border-black p-3 rounded-2xl mb-3'
             >
                 <MaterialIcons name="email" size={24} color="black" />
-                <Text className='text-xl font-mbold'>Username</Text>
+                <Text className='text-xl font-mbold'>Email</Text>
                 <View className='ml-6' />
             </TouchableOpacity>
 
@@ -124,13 +123,13 @@ const Login = () => {
                         className="gap-y-4 mt-4"
                     >
                         <TextInput
-                            placeholder="Username"
+                            placeholder="Email"
                             placeholderTextColor="black"
                             className="border border-gray-300 rounded-xl h-16 px-4 text-lg"
                             keyboardType="email-address"
                             autoCapitalize="none"
-                            value={username}
-                            onChangeText={setusername}
+                            value={email}
+                            onChangeText={setEmail}
                         />
 
                         <TextInput

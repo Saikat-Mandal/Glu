@@ -4,10 +4,11 @@ import { Image, Pressable, Text, View } from 'react-native';
 import image from '../assets/images/c1.jpg';
 import InputSpinner from './InputSpinner';
 
-const RoomCard = ({ roomId, roomType, price, availability, onBedsChange }) => {
+const RoomCard = ({ roomId, roomType, price, availability, onBedsChange, imageUrl }) => {
 
     const [onSelectBedPress, setOnSelectBedPress] = useState(false);
     const [bedsCount, setBedsCount] = useState(1);
+
 
     const handleBedsChange = (beds) => {
         setBedsCount(beds);
@@ -20,7 +21,7 @@ const RoomCard = ({ roomId, roomType, price, availability, onBedsChange }) => {
 
     return (
         <Pressable className=' rounded-xl bg-slate-200 mb-6' >
-            <Image source={image} resizeMode='cover' className='h-44 w-full rounded-t-xl' />
+            <Image source={imageUrl ? { uri: imageUrl } : image} resizeMode='cover' className='h-44 w-full rounded-t-xl' />
             <View className='px-4 pb-6'>
                 <View className='flex-row items-center justify-between mt-4'>
                     <Text className=' font-fbold text-lg w-1/2'>{roomType} </Text>
