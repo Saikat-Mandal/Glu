@@ -1,5 +1,4 @@
 import { formatToUTCBookingReview, getNumberOfGuests, getTotalNights } from '@/utils/hostelUtils';
-import { Picker } from '@react-native-picker/picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,6 +8,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import axios from 'axios';
 import image from '../assets/images/c1.jpg';
 
 const BookingReview = () => {
@@ -39,7 +39,6 @@ const BookingReview = () => {
                 lastName: '',
                 phone: '',
                 email: '',
-                gender: 'Male',
             }));
             setGuestList(initialGuests);
         }
@@ -50,21 +49,33 @@ const BookingReview = () => {
         return Math.round(parseFloat(priceValue) * 100);
     };
 
+    // Make sure this is imported at the top
+
     const fetchPaymentSheetParams = async () => {
-        const response = await fetch(`http://192.168.29.221:8080/api/v1/payment-sheet`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                amount: getAmountInCents(grandTotal)
-            })
-        });
+        try {
+            const response = await axios.post(
+                "http://192.168.29.221:8080/api/v1/payment-sheet",
+                {
+                    amount: getAmountInCents(grandTotal),
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
 
-        const { paymentIntent, ephemeralKey, customer } = await response.json();
+            // Destructure from response.data (NOT response.json())
+            const { paymentIntent, ephemeralKey, customer } = response.data;
+            console.log(paymentIntent, ephemeralKey, customer);
 
-        return { paymentIntent, ephemeralKey, customer };
+            return { paymentIntent, ephemeralKey, customer };
+        } catch (error) {
+            console.error("Failed to fetch payment sheet params:", error);
+            throw error;
+        }
     };
+
 
     const initializePaymentSheet = async () => {
         try {
@@ -77,6 +88,7 @@ const BookingReview = () => {
                 merchantDisplayName: "The Hosteller",
                 allowsDelayedPaymentMethods: true,
                 defaultBillingDetails: { name: 'Saikat Mandal' },
+                returnURL: 'hosteller://payment-complete',
             });
 
             if (error) {
@@ -92,6 +104,7 @@ const BookingReview = () => {
     const openPaymentSheet = async () => {
         const { error } = await presentPaymentSheet();
         if (error) {
+            console.log("Payment Sheet error:", error);
             Alert.alert(`Error code: ${error.code}`, error.message);
         } else {
             Alert.alert('✅ Success', 'Your order is confirmed!');
@@ -99,8 +112,13 @@ const BookingReview = () => {
         }
     };
 
+
     useEffect(() => {
-        initializePaymentSheet();
+        const init = async () => {
+            await initializePaymentSheet(); // runs once
+        };
+
+        init();
     }, []);
 
     return (
@@ -152,14 +170,16 @@ const BookingReview = () => {
                     {guestList.map((guest, index) => (
                         <UserInfo
                             key={index}
-                            name={guest.firstName || `Guest ${index + 1}`}
+                            name={guest.firstName}
                             phone={guest.phone}
                             email={guest.email}
+                            index={index}
                             setEditGuestModal={() => {
                                 setEditingGuestIndex(index);
                                 setEditGuestModal(true);
                             }}
                         />
+
                     ))}
                 </View>
 
@@ -169,7 +189,7 @@ const BookingReview = () => {
                     animationType="slide"
                     onRequestClose={() => setEditGuestModal(false)}
                 >
-                    <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: 'rgba(0,0,0,0.5)', width: '100%' }}>
+                    <View className='mt-20' style={{ flex: 1, justifyContent: "flex-end", backgroundColor: 'rgba(0,0,0,0.5)', width: '100%' }}>
                         <View style={{ backgroundColor: "white", borderRadius: 10, padding: 20, width: '100%', height: '100%' }}>
                             <Pressable onPress={() => setEditGuestModal(false)}>
                                 <MaterialIcons name="close" size={24} color="black" />
@@ -223,21 +243,7 @@ const BookingReview = () => {
                                             setGuestList(updated);
                                         }}
                                     />
-                                    <View className='border border-gray-300 rounded-xl overflow-hidden mt-8'>
-                                        <Picker
-                                            selectedValue={guestList[editingGuestIndex].gender}
-                                            onValueChange={(value) => {
-                                                const updated = [...guestList];
-                                                updated[editingGuestIndex].gender = value;
-                                                setGuestList(updated);
-                                            }}
-                                            style={{ height: 50, color: 'black' }}
-                                        >
-                                            <Picker.Item label="Select Gender" value="" />
-                                            <Picker.Item label="Male" value="Male" />
-                                            <Picker.Item label="Female" value="Female" />
-                                        </Picker>
-                                    </View>
+
                                 </>
                             )}
 
@@ -280,7 +286,7 @@ const BookingReview = () => {
 
                 <TouchableOpacity
                     onPress={async () => {
-                        await initializePaymentSheet().then(openPaymentSheet);
+                        await openPaymentSheet(); // ✅ no re-initialize
                     }}
                     className='bg-primary mx-8 p-4 flex justify-center items-center mt-10 mb-10 rounded-lg'
                 >
